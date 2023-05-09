@@ -1,25 +1,29 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
+var db = initData()
+
 func main() {
 	router := mux.NewRouter()
-
-	router.HandleFunc("/hello", Hello)
-	router.HandleFunc("/status", Status)
-
+	router.HandleFunc("/list", listItemsHandler).Methods("GET")
 	http.ListenAndServe(":8000", router)
 }
 
-func Hello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, you've requested %s\n", r.URL.Path)
+func initData() map[int]string {
+	db := map[int]string{
+		0: "Vinicius",
+		1: "Naiara",
+	}
+	return db
 }
 
-func Status(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Status: %v\n", http.StatusOK)
+func listItemsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(db)
 }
