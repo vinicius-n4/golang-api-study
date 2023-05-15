@@ -2,29 +2,38 @@ package main
 
 import (
 	"encoding/json"
-	"io"
+	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 type Item struct {
-	Id   int    `json:"id"`
 	Name string `json:"name"`
 }
 
-var items = []Item{
-	{0, "Vinicius"},
-	{1, "Naiara"},
-}
+var items = make(map[int64]Item)
 
 func main() {
+	initData()
+
 	router := mux.NewRouter()
 	router.HandleFunc("/list", listItemsHandler).Methods("GET")
 	router.HandleFunc("/create", createItemHandler).Methods("POST")
 	router.HandleFunc("/update/{id}", updateItemHandler).Methods("PUT")
+
 	http.ListenAndServe(":8000", router)
+}
+
+func initData() {
+	items[0] = Item{
+		"Vinicius",
+	}
+	items[1] = Item{
+		"Nogueira",
+	}
+	items[2] = Item{
+		"Costa",
+	}
 }
 
 func listItemsHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,30 +43,25 @@ func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 
 func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	reqBody, _ := io.ReadAll(r.Body)
 
-	var newItem Item
-	json.Unmarshal(reqBody, &newItem)
-	items = append(items, newItem)
+	id := r.FormValue("id")
+	idInt64, _ := strconv.ParseInt(id, 10, 64)
+
+	nome := r.FormValue("name")
+	items[idInt64] = Item{Name: nome}
+
 	json.NewEncoder(w).Encode(items)
 }
 
 func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
 	vars := mux.Vars(r)
 	id := vars["id"]
+	idInt64, _ := strconv.ParseInt(id, 10, 64)
 
-	for index, item := range items {
-		i, _ := strconv.Atoi(id)
-		if item.Id == i {
-			items = append(items[:index], items[index+1:]...)
+	name := r.FormValue("name")
+	items[idInt64] = Item{Name: name}
 
-			var updateItem Item
-
-			json.NewDecoder(r.Body).Decode(&updateItem)
-			items = append(items, updateItem)
-			json.NewEncoder(w).Encode(updateItem)
-			return
-		}
-	}
+	json.NewEncoder(w).Encode(items[idInt64])
 }
