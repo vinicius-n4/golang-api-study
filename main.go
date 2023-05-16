@@ -20,6 +20,7 @@ func main() {
 	router.HandleFunc("/list", listItemsHandler).Methods("GET")
 	router.HandleFunc("/create", createItemHandler).Methods("POST")
 	router.HandleFunc("/update/{id}", updateItemHandler).Methods("PUT")
+	router.HandleFunc("/delete/{id}", deleteItemHandler).Methods("DELETE")
 
 	http.ListenAndServe(":8000", router)
 }
@@ -63,5 +64,16 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	items[idInt64] = Item{Name: name}
 
+	json.NewEncoder(w).Encode(items[idInt64])
+}
+
+func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+	idInt64, _ := strconv.ParseInt(id, 10, 64)
+
+	delete(items, idInt64)
 	json.NewEncoder(w).Encode(items[idInt64])
 }
