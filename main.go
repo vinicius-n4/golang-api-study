@@ -45,13 +45,13 @@ func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	id := r.FormValue("id")
-	idInt64, _ := strconv.ParseInt(id, 10, 64)
+	id := len(items)
+	idInt64 := int64(id)
 
 	nome := r.FormValue("name")
 	items[idInt64] = Item{Name: nome}
 
-	json.NewEncoder(w).Encode(items)
+	json.NewEncoder(w).Encode(items[idInt64])
 }
 
 func updateItemHandler(w http.ResponseWriter, r *http.Request) {
