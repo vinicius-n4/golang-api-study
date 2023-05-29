@@ -33,7 +33,7 @@ This is my study repository about a functional Golang API service. This API allo
 #### Delete item
 
 ```http
-  PUT /delete/${id}
+  DELETE /delete/${id}
 ```
 
 | Parameter | Type     | Description                        |
