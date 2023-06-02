@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
+	"sort"
 	"strconv"
 )
 
@@ -26,13 +27,13 @@ func main() {
 }
 
 func initData() {
-	items[0] = Item{
+	items[1] = Item{
 		"Vinicius",
 	}
-	items[1] = Item{
+	items[2] = Item{
 		"Nogueira",
 	}
-	items[2] = Item{
+	items[3] = Item{
 		"Costa",
 	}
 }
@@ -45,13 +46,21 @@ func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	id := len(items)
-	idInt64 := int64(id)
+	keys := make([]int, 0, len(items))
+	for k, _ := range items {
+		intKey := int(k)
+		keys = append(keys, intKey)
+	}
+	sort.Ints(keys)
 
-	nome := r.FormValue("name")
-	items[idInt64] = Item{Name: nome}
+	lastIndex := len(keys) - 1
+	lastIdInt64 := int64(keys[lastIndex])
+	newIdInt64 := lastIdInt64 + 1
 
-	json.NewEncoder(w).Encode(items[idInt64])
+	name := r.FormValue("name")
+	items[newIdInt64] = Item{Name: name}
+
+	json.NewEncoder(w).Encode(items[newIdInt64])
 }
 
 func updateItemHandler(w http.ResponseWriter, r *http.Request) {
