@@ -73,7 +73,7 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	if items[idInt64].Name == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		respMessage["message"] = "ID doesn't exist. Try to list items before update them."
+		respMessage["message"] = "ID " + id + " doesn't exist. Try to list items before update them."
 		json.NewEncoder(w).Encode(respMessage)
 		return
 	}
