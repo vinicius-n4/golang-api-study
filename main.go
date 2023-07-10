@@ -91,6 +91,13 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 	idInt64, _ := strconv.ParseInt(id, 10, 64)
 
+	if items[idInt64].Name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		respMessage["message"] = "ID " + id + " doesn't exist. Try to list items before delete them."
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
+
 	delete(items, idInt64)
 	json.NewEncoder(w).Encode(items[idInt64])
 }
