@@ -13,6 +13,7 @@ type Item struct {
 }
 
 var items = make(map[int64]Item)
+var respMessage = make(map[string]string)
 
 func main() {
 	initData()
@@ -70,6 +71,13 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 	idInt64, _ := strconv.ParseInt(id, 10, 64)
 
+	if items[idInt64].Name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		respMessage["message"] = "ID " + id + " doesn't exist. Try to list items before update them."
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
+
 	name := r.FormValue("name")
 	items[idInt64] = Item{Name: name}
 
@@ -82,6 +90,13 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	idInt64, _ := strconv.ParseInt(id, 10, 64)
+
+	if items[idInt64].Name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		respMessage["message"] = "ID " + id + " doesn't exist. Try to list items before delete them."
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
 
 	delete(items, idInt64)
 	json.NewEncoder(w).Encode(items[idInt64])

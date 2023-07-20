@@ -91,9 +91,18 @@ $ curl --location --request PUT 'http://localhost:8000/update/0' \
 ```
 
 Return:
+
+`Status Code: 200 OK`
 ```json
 {
     "name": "Diogo"
+}
+```
+
+`Status Code: 400 Bad Request`
+```json
+{
+    "message": "ID doesn't exist. Try to list items before update them."
 }
 ```
 
@@ -105,8 +114,17 @@ $ curl --location --request DELETE 'http://localhost:8000/delete/0' \
 ```
 
 Return:
+
+`Status Code: 200 OK`
 ```json
 {
     "name": ""
+}
+```
+
+`Status Code: 400 Bad Request`
+```json
+{
+    "message": "ID doesn't exist. Try to list items before delete them."
 }
 ```
