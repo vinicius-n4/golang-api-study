@@ -3,20 +3,19 @@ package main
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/vinicius-n4/golang-api-study/database"
 	"net/http"
-	"sort"
-	"strconv"
 )
 
 type Item struct {
+	Id   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
-var items = make(map[int64]Item)
-var respMessage = make(map[string]string)
+// TODO: error message: var respMessage = make(map[string]string)
 
 func main() {
-	initData()
+	database.ConnectToDatabase()
 
 	router := mux.NewRouter()
 	router.HandleFunc("/list", listItemsHandler).Methods("GET")
@@ -27,77 +26,42 @@ func main() {
 	http.ListenAndServe(":8000", router)
 }
 
-func initData() {
-	items[1] = Item{
-		"Vinicius",
-	}
-	items[2] = Item{
-		"Nogueira",
-	}
-	items[3] = Item{
-		"Costa",
-	}
-}
-
 func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(items)
+	var name []Item
+	database.DB.Find(&name)
+
+	json.NewEncoder(w).Encode(name)
 }
 
 func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var name = Item{Name: r.FormValue("name")}
+	database.DB.Create(&name)
 
-	keys := make([]int, 0, len(items))
-	for k, _ := range items {
-		intKey := int(k)
-		keys = append(keys, intKey)
-	}
-	sort.Ints(keys)
-
-	lastIndex := len(keys) - 1
-	lastIdInt64 := int64(keys[lastIndex])
-	newIdInt64 := lastIdInt64 + 1
-
-	name := r.FormValue("name")
-	items[newIdInt64] = Item{Name: name}
-
-	json.NewEncoder(w).Encode(items[newIdInt64])
+	json.NewEncoder(w).Encode(name)
 }
 
 func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
 	vars := mux.Vars(r)
 	id := vars["id"]
-	idInt64, _ := strconv.ParseInt(id, 10, 64)
+	var name Item
+	database.DB.First(&name, id)
+	name.Name = r.FormValue("name")
+	database.DB.Save(&name)
+	// TODO: implement inexistent id validation (record not found)
 
-	if items[idInt64].Name == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		respMessage["message"] = "ID " + id + " doesn't exist. Try to list items before update them."
-		json.NewEncoder(w).Encode(respMessage)
-		return
-	}
-
-	name := r.FormValue("name")
-	items[idInt64] = Item{Name: name}
-
-	json.NewEncoder(w).Encode(items[idInt64])
+	json.NewEncoder(w).Encode(name)
 }
 
 func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
 	vars := mux.Vars(r)
 	id := vars["id"]
-	idInt64, _ := strconv.ParseInt(id, 10, 64)
+	var name Item
+	database.DB.Delete(&name, id)
+	// TODO: implement inexistent id validation (record not found)
 
-	if items[idInt64].Name == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		respMessage["message"] = "ID " + id + " doesn't exist. Try to list items before delete them."
-		json.NewEncoder(w).Encode(respMessage)
-		return
-	}
-
-	delete(items, idInt64)
-	json.NewEncoder(w).Encode(items[idInt64])
+	json.NewEncoder(w).Encode(name)
 }
