@@ -1,9 +1,9 @@
-create table names_table(
+create table items(
     id serial primary key,
     name varchar
 );
 
-INSERT INTO names_table(name) VALUES
+INSERT INTO items(name) VALUES
     ('Vinicius'),
     ('Nogueira'),
     ('Costa');

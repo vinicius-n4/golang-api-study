@@ -41,6 +41,7 @@ This is my study repository about a functional Golang API service. This API allo
 | `id`      | `string` | **Required**. Id of item to delete |
 
 ## Usage/Examples
+// TODO: update documentation with docker command
 
 Open a terminal and, in the repository directory, run the following command to start the server that will be listening `http://localhost:8000`.
 
