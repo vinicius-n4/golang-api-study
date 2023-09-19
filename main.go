@@ -12,7 +12,7 @@ type Item struct {
 	Name string `json:"name"`
 }
 
-// TODO: error message: var respMessage = make(map[string]string)
+var respMessage = make(map[string]string)
 
 func main() {
 	database.ConnectToDatabase()
@@ -47,10 +47,19 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	var name Item
-	database.DB.First(&name, id)
+
+	err := database.DB.First(&name, id)
+	if err.Error != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
+			": ID " + id + " doesn't exist. Try to list items before update them."
+
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
+
 	name.Name = r.FormValue("name")
 	database.DB.Save(&name)
-	// TODO: implement inexistent id validation (record not found)
 
 	json.NewEncoder(w).Encode(name)
 }
@@ -60,8 +69,18 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	var name Item
+
+	err := database.DB.First(&name, id)
+	if err.Error != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
+			": ID " + id + " doesn't exist. Try to list items before delete them."
+
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
+
 	database.DB.Delete(&name, id)
-	// TODO: implement inexistent id validation (record not found)
 
 	json.NewEncoder(w).Encode(name)
 }
