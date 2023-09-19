@@ -2,7 +2,11 @@ module github.com/vinicius-n4/golang-api-study
 
 go 1.19
 
-require github.com/gorilla/mux v1.8.0
+require (
+	github.com/gorilla/mux v1.8.0
+	gorm.io/driver/postgres v1.5.2
+	gorm.io/gorm v1.25.4
+)
 
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -12,6 +16,4 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	golang.org/x/crypto v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
-	gorm.io/driver/postgres v1.5.2 // indirect
-	gorm.io/gorm v1.25.4 // indirect
 )
