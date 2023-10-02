@@ -8,8 +8,9 @@ import (
 )
 
 type Item struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	Id       int64  `json:"id"`
+	Name     string `json:"name"`
+	Document string `json:"document"`
 }
 
 var respMessage = make(map[string]string)
@@ -28,27 +29,30 @@ func main() {
 
 func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var name []Item
-	database.DB.Find(&name)
+	var data []Item
+	database.DB.Find(&data)
 
-	json.NewEncoder(w).Encode(name)
+	json.NewEncoder(w).Encode(data)
 }
 
 func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var name = Item{Name: r.FormValue("name")}
-	database.DB.Create(&name)
+	var data = Item{
+		Name:     r.FormValue("name"),
+		Document: r.FormValue("document"),
+	}
+	database.DB.Create(&data)
 
-	json.NewEncoder(w).Encode(name)
+	json.NewEncoder(w).Encode(data)
 }
 
 func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	id := vars["id"]
-	var name Item
+	var data Item
 
-	err := database.DB.First(&name, id)
+	err := database.DB.First(&data, id)
 	if err.Error != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
@@ -58,19 +62,20 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name.Name = r.FormValue("name")
-	database.DB.Save(&name)
+	data.Name = r.FormValue("name")
+	data.Document = r.FormValue("document")
+	database.DB.Save(&data)
 
-	json.NewEncoder(w).Encode(name)
+	json.NewEncoder(w).Encode(data)
 }
 
 func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	id := vars["id"]
-	var name Item
+	var data Item
 
-	err := database.DB.First(&name, id)
+	err := database.DB.First(&data, id)
 	if err.Error != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
@@ -80,7 +85,7 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	database.DB.Delete(&name, id)
+	database.DB.Delete(&data, id)
 
-	json.NewEncoder(w).Encode(name)
+	json.NewEncoder(w).Encode(data)
 }
