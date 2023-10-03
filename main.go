@@ -37,6 +37,16 @@ func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 
 func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	
+	if r.FormValue("name") == "" || r.FormValue("document") == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
+			": 'name' and 'document' fields mustn't be empty."
+
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
+
 	var data = Item{
 		Name:     r.FormValue("name"),
 		Document: r.FormValue("document"),
@@ -62,8 +72,23 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.Name = r.FormValue("name")
-	data.Document = r.FormValue("document")
+	if r.FormValue("name") == "" && r.FormValue("document") == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
+			": 'name' or 'document' field mustn't be empty."
+
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
+
+	if r.FormValue("name") != "" {
+		data.Name = r.FormValue("name")
+	}
+
+	if r.FormValue("document") != "" {
+		data.Document = r.FormValue("document")
+	}
+
 	database.DB.Save(&data)
 
 	json.NewEncoder(w).Encode(data)
