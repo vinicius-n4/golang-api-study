@@ -31,26 +31,27 @@
 				"header": [],
 				"body": {
 					"mode": "formdata",
-					"formdata": []
+					"formdata": [
+						{
+							"key": "name",
+							"value": "Vinicius",
+							"type": "text"
+						},
+						{
+							"key": "document",
+							"value": "76543219876",
+							"type": "text"
+						}
+					]
 				},
 				"url": {
-					"raw": "localhost:8000/create?id=5&name=Yu",
+					"raw": "localhost:8000/create",
 					"host": [
 						"localhost"
 					],
 					"port": "8000",
 					"path": [
 						"create"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "5"
-						},
-						{
-							"key": "name",
-							"value": "Yu"
-						}
 					]
 				}
 			},
@@ -63,23 +64,28 @@
 				"header": [],
 				"body": {
 					"mode": "formdata",
-					"formdata": []
+					"formdata": [
+						{
+							"key": "name",
+							"value": "Silva",
+							"type": "text"
+						},
+						{
+							"key": "document",
+							"value": "12345678901",
+							"type": "text"
+						}
+					]
 				},
 				"url": {
-					"raw": "localhost:8000/update/2?name=Walnut",
+					"raw": "localhost:8000/update/4",
 					"host": [
 						"localhost"
 					],
 					"port": "8000",
 					"path": [
 						"update",
-						"2"
-					],
-					"query": [
-						{
-							"key": "name",
-							"value": "Walnut"
-						}
+						"4"
 					]
 				}
 			},
@@ -95,14 +101,14 @@
 					"formdata": []
 				},
 				"url": {
-					"raw": "localhost:8000/delete/5",
+					"raw": "localhost:8000/delete/4",
 					"host": [
 						"localhost"
 					],
 					"port": "8000",
 					"path": [
 						"delete",
-						"5"
+						"4"
 					]
 				}
 			},

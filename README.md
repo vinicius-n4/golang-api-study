@@ -16,8 +16,8 @@ This is my study repository about a functional Golang API service. This API allo
   POST /create
 ```
 
-| Key        | Type                  | Description                      |
-|:-----------|:----------------------|:---------------------------------|
+| Key        | Mode        | Description                      |
+|:-----------|:------------|:---------------------------------|
 | `name`     | `form-data` | **Required**. A name of a person |
 | `document` | `form-data` | **Required**. A document number  |
 
@@ -27,11 +27,11 @@ This is my study repository about a functional Golang API service. This API allo
   PUT /update/${id}
 ```
 
-| Parameter   | Type               | Description                        |
-|:------------|:-------------------|:-----------------------------------|
-| `id`        | `endpoint vaiable` | **Required**. Id of item to update |
-| `name`      | `form-data`        | **Required**. A name of a person   |
-| `document`  | `form-data`        | **Required**. A document number    |
+| Parameter   | Mode                | Description                        |
+|:------------|:--------------------|:-----------------------------------|
+| `id`        | `endpoint variable` | **Required**. Id of item to update |
+| `name`      | `form-data`         | **Required**. A name of a person   |
+| `document`  | `form-data`         | **Required**. A document number    |
 
 #### Delete item
 
@@ -39,7 +39,7 @@ This is my study repository about a functional Golang API service. This API allo
   DELETE /delete/${id}
 ```
 
-| Parameter | Type                | Description                        |
+| Parameter | Mode                | Description                        |
 | :-------- |:--------------------| :--------------------------------- |
 | `id`      | `endpoint variable` | **Required**. Id of item to delete |
 
