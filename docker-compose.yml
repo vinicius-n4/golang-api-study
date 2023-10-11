@@ -1,6 +1,7 @@
 version: '3'
 services:
   api:
+    container_name: api_go
     build:
       context: .
       dockerfile: Dockerfile
@@ -8,7 +9,9 @@ services:
       - "8000:8000"
     depends_on:
       - postgres
+  
   postgres:
+    container_name: db_postgres
     image: "postgres"
     environment:
       - POSTGRES_USER=root
