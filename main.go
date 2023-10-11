@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"net/http"
+	"strconv"
+
 	"github.com/gorilla/mux"
 	"github.com/vinicius-n4/golang-api-study/database"
-	"net/http"
 )
 
 type Item struct {
@@ -32,6 +34,10 @@ func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 	var data []Item
 	database.DB.Find(&data)
 
+	for i := range data {
+        data[i].Document = formatDocument(data[i].Document)
+    }
+
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -47,12 +53,24 @@ func createItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(r.FormValue("document")) != 11 {
+		w.WriteHeader(http.StatusBadRequest)
+		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
+			": 'document' field must be 11 characters, instead of " + 
+			strconv.Itoa(len(r.FormValue("document"))) + "."
+
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
+
 	var data = Item{
 		Name:     r.FormValue("name"),
 		Document: r.FormValue("document"),
 	}
 	database.DB.Create(&data)
 
+	data.Document = formatDocument(data.Document)
+	
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -87,9 +105,21 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.FormValue("document") != "" {
 		data.Document = r.FormValue("document")
+
+		if len(r.FormValue("document")) != 11 {
+			w.WriteHeader(http.StatusBadRequest)
+			respMessage["message"] = http.StatusText(http.StatusBadRequest) +
+				": 'document' field must be 11 characters, instead of " + 
+				strconv.Itoa(len(r.FormValue("document"))) + "."
+	
+			json.NewEncoder(w).Encode(respMessage)
+			return
+		}
 	}
 
 	database.DB.Save(&data)
+
+	data.Document = formatDocument(data.Document)
 
 	json.NewEncoder(w).Encode(data)
 }
@@ -112,5 +142,11 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	database.DB.Delete(&data, id)
 
+	data.Document = formatDocument(data.Document)
+
 	json.NewEncoder(w).Encode(data)
+}
+
+func formatDocument(document string) string {
+    return document[:3] + "." + document[3:6] + "." + document[6:9] + "-" + document[9:]
 }
