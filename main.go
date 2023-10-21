@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/vinicius-n4/golang-api-study/database"
 )
 
@@ -18,6 +20,7 @@ type Item struct {
 var respMessage = make(map[string]string)
 
 func main() {
+	loadEnv()
 	database.ConnectToDatabase()
 
 	router := mux.NewRouter()
@@ -35,15 +38,15 @@ func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 	database.DB.Find(&data)
 
 	for i := range data {
-        data[i].Document = formatDocument(data[i].Document)
-    }
+		data[i].Document = formatDocument(data[i].Document)
+	}
 
 	json.NewEncoder(w).Encode(data)
 }
 
 func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	if r.FormValue("name") == "" || r.FormValue("document") == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
@@ -56,7 +59,7 @@ func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.FormValue("document")) != 11 {
 		w.WriteHeader(http.StatusBadRequest)
 		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
-			": 'document' field must be 11 characters, instead of " + 
+			": 'document' field must be 11 characters, instead of " +
 			strconv.Itoa(len(r.FormValue("document"))) + "."
 
 		json.NewEncoder(w).Encode(respMessage)
@@ -70,7 +73,7 @@ func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	database.DB.Create(&data)
 
 	data.Document = formatDocument(data.Document)
-	
+
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -109,9 +112,9 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 		if len(r.FormValue("document")) != 11 {
 			w.WriteHeader(http.StatusBadRequest)
 			respMessage["message"] = http.StatusText(http.StatusBadRequest) +
-				": 'document' field must be 11 characters, instead of " + 
+				": 'document' field must be 11 characters, instead of " +
 				strconv.Itoa(len(r.FormValue("document"))) + "."
-	
+
 			json.NewEncoder(w).Encode(respMessage)
 			return
 		}
@@ -148,5 +151,12 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func formatDocument(document string) string {
-    return document[:3] + "." + document[3:6] + "." + document[6:9] + "-" + document[9:]
+	return document[:3] + "." + document[3:6] + "." + document[6:9] + "-" + document[9:]
+}
+
+func loadEnv() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 }
