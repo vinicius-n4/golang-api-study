@@ -35,7 +35,7 @@ func main() {
 func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var data []Item
-	database.DB.Find(&data)
+	database.DB.Order("name asc").Find(&data)
 
 	for i := range data {
 		data[i].Document = formatDocument(data[i].Document)
