@@ -1,19 +1,12 @@
-FROM debian:bookworm-slim
-
-RUN apt update && \
-    apt install -y curl
-
-WORKDIR /tmp
-
-RUN curl https://dl.google.com/go/go1.21.1.linux-amd64.tar.gz -o go.tar.gz && \
-    tar -C /usr/local -xzf go.tar.gz && \
-    rm -rf go.tar.gz
-
-ENV GOPATH /usr/local/go
-ENV PATH $PATH:$GOPATH/bin
+FROM golang:1.21.1
 
 WORKDIR /golang-api-study
 
 COPY . .
+RUN go mod download
 
-CMD ["go", "run", "main.go"]
+RUN CGO_ENABLE=0 GOOS=linux go build -o /main
+
+EXPOSE 8000
+
+CMD ["/main"]
