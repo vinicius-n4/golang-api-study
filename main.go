@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/mvrilo/go-cpf"
 	"github.com/vinicius-n4/golang-api-study/database"
 )
 
@@ -56,11 +56,11 @@ func createItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(r.FormValue("document")) != 11 {
+	_, err := cpf.Valid(r.FormValue("document"))
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
-			": 'document' field must be 11 characters, instead of " +
-			strconv.Itoa(len(r.FormValue("document"))) + "."
+			": 'document' validation: " + err.Error()
 
 		json.NewEncoder(w).Encode(respMessage)
 		return
@@ -107,20 +107,19 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.FormValue("document") != "" {
-		data.Document = r.FormValue("document")
-
-		if len(r.FormValue("document")) != 11 {
+		_, err := cpf.Valid(r.FormValue("document"))
+		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			respMessage["message"] = http.StatusText(http.StatusBadRequest) +
-				": 'document' field must be 11 characters, instead of " +
-				strconv.Itoa(len(r.FormValue("document"))) + "."
+				": 'document' validation: " + err.Error()
 
 			json.NewEncoder(w).Encode(respMessage)
 			return
 		}
+		data.Document = r.FormValue("document")
 	}
 
-	database.DB.Save(&data)
+	database.DB.Updates(&data)
 
 	data.Document = formatDocument(data.Document)
 
@@ -157,6 +156,6 @@ func formatDocument(document string) string {
 func loadEnv() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file.")
 	}
 }

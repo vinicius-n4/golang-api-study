@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/gorilla/mux v1.8.0
+	github.com/mvrilo/go-cpf v0.0.0-20150109121854-4113d38c8d21
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/gorm v1.25.4
 )
