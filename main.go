@@ -35,7 +35,16 @@ func main() {
 func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var data []Item
-	database.DB.Order("name asc").Find(&data)
+
+	dbErr := database.DB.Order("name asc").Find(&data)
+	if dbErr.Error != nil {
+		w.WriteHeader(http.StatusNoContent)
+		respMessage["message"] = http.StatusText(http.StatusNoContent) +
+			": Database table is empty."
+
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
 
 	for i := range data {
 		data[i].Document = formatDocument(data[i].Document)
@@ -70,7 +79,16 @@ func createItemHandler(w http.ResponseWriter, r *http.Request) {
 		Name:     r.FormValue("name"),
 		Document: r.FormValue("document"),
 	}
-	database.DB.Create(&data)
+
+	dbErr := database.DB.Create(&data)
+	if dbErr.Error != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		respMessage["message"] = http.StatusText(http.StatusFailedDependency) +
+			": Error writing data on table."
+
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
 
 	data.Document = formatDocument(data.Document)
 
@@ -83,8 +101,8 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 	var data Item
 
-	err := database.DB.First(&data, id)
-	if err.Error != nil {
+	dbErr := database.DB.First(&data, id)
+	if dbErr.Error != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		respMessage["message"] = http.StatusText(http.StatusBadRequest) +
 			": ID " + id + " doesn't exist. Try to list items before update them."
@@ -119,7 +137,15 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 		data.Document = r.FormValue("document")
 	}
 
-	database.DB.Updates(&data)
+	dbErr = database.DB.Updates(&data)
+	if dbErr.Error != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		respMessage["message"] = http.StatusText(http.StatusFailedDependency) +
+			": Error updating data on table."
+
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
 
 	data.Document = formatDocument(data.Document)
 
@@ -142,7 +168,15 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	database.DB.Delete(&data, id)
+	dbErr := database.DB.Delete(&data, id)
+	if dbErr.Error != nil {
+		w.WriteHeader(http.StatusFailedDependency)
+		respMessage["message"] = http.StatusText(http.StatusFailedDependency) +
+			": Error deleting data on table."
+
+		json.NewEncoder(w).Encode(respMessage)
+		return
+	}
 
 	data.Document = formatDocument(data.Document)
 
