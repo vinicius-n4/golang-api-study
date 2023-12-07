@@ -16,9 +16,10 @@ This is my study repository about a functional Golang API service. This API allo
   POST /create
 ```
 
-| Key       | Type     | Description                      |
-| :-------- | :------- | :------------------------------- |
-| `name`    | `string` | **Required**. A name of a person |
+| Key        | Mode        | Description                      |
+|:-----------|:------------|:---------------------------------|
+| `name`     | `form-data` | **Required**. A name of a person |
+| `document` | `form-data` | **Required**. A document number  |
 
 #### Update item
 
@@ -26,9 +27,11 @@ This is my study repository about a functional Golang API service. This API allo
   PUT /update/${id}
 ```
 
-| Parameter | Type     | Description                        |
-| :-------- | :------- | :--------------------------------- |
-| `id`      | `string` | **Required**. Id of item to update |
+| Parameter   | Mode                | Description                        |
+|:------------|:--------------------|:-----------------------------------|
+| `id`        | `endpoint variable` | **Required**. Id of item to update |
+| `name`      | `form-data`         | **Required**. A name of a person   |
+| `document`  | `form-data`         | **Required**. A document number    |
 
 #### Delete item
 
@@ -36,16 +39,16 @@ This is my study repository about a functional Golang API service. This API allo
   DELETE /delete/${id}
 ```
 
-| Parameter | Type     | Description                        |
-| :-------- | :------- | :--------------------------------- |
-| `id`      | `string` | **Required**. Id of item to delete |
+| Parameter | Mode                | Description                        |
+| :-------- |:--------------------| :--------------------------------- |
+| `id`      | `endpoint variable` | **Required**. Id of item to delete |
 
 ## Usage/Examples
 
-Open a terminal and, in the repository directory, run the following command to start the server that will be listening `http://localhost:8000`.
+Open a terminal and, in the repository directory, run the following command to start the database and the server that will be listening `http://localhost:8000`.
 
 ```sh
-$ go run main.go
+$ docker compose up
 ```
 
 ### List items
@@ -56,38 +59,44 @@ $ curl --location --request GET 'http://localhost:8000/list'
 
 Return:
 ```json
-{
-    "0": {
-        "name": "Vinicius"
+[
+    {   "id": 1,
+        "name": "Vinicius",
+        "document": "09876543210"
     },
-    "1": {
-        "name": "Nogueira"
+    {   "id": 2,
+        "name": "Nogueira",
+        "document": "98765432109"
     },
-    "2": {
-        "name": "Costa"
+    {   "id": 3,
+        "name": "Costa",
+        "document": "87654321098"
     }
-}
+]
 ```
 
 ### Create item
 
 ```sh
 $ curl --location --request POST 'http://localhost:8000/create' \
---form 'name="Vinicius"'
+--form 'name="Silva"' \
+--form 'document="76543210987"'
 ```
 
 Return:
 ```json
-{
-    "name": "Vinicius"
+{   "id": 4,
+    "name": "Silva",
+    "document": "76543210987"
 }
 ```
 
 ### Update item
 
 ```sh
-$ curl --location --request PUT 'http://localhost:8000/update/0' \
---form 'name="Diogo"'
+$ curl --location --request PUT 'http://localhost:8000/update/4' \
+--form 'name="Silva"' \
+--form 'document="12345678901"'
 ```
 
 Return:
@@ -95,7 +104,9 @@ Return:
 `Status Code: 200 OK`
 ```json
 {
-    "name": "Diogo"
+  "id": 4,
+  "name": "Silva",
+  "document": "12345678901"
 }
 ```
 
@@ -109,8 +120,7 @@ Return:
 ### Delete item
 
 ```sh
-$ curl --location --request DELETE 'http://localhost:8000/delete/0' \
---form 'name="João"'
+$ curl --location --request DELETE 'http://localhost:8000/delete/4'
 ```
 
 Return:
@@ -118,7 +128,9 @@ Return:
 `Status Code: 200 OK`
 ```json
 {
-    "name": ""
+  "id": 4,
+  "name": "Silva",
+  "document": "12345678901"
 }
 ```
 
