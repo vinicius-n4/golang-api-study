@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -36,7 +37,7 @@ func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var data []Item
 
-	dbErr := database.DB.Order("name asc").Find(&data)
+	dbErr := database.DB.Find(&data)
 	if dbErr.Error != nil {
 		w.WriteHeader(http.StatusNoContent)
 		respMessage["message"] = http.StatusText(http.StatusNoContent) +
@@ -50,7 +51,9 @@ func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 		data[i].Document = formatDocument(data[i].Document)
 	}
 
-	json.NewEncoder(w).Encode(data)
+	sortedList := sortNames(data)
+
+	json.NewEncoder(w).Encode(sortedList)
 }
 
 func createItemHandler(w http.ResponseWriter, r *http.Request) {
@@ -185,6 +188,33 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 
 func formatDocument(document string) string {
 	return document[:3] + "." + document[3:6] + "." + document[6:9] + "-" + document[9:]
+}
+
+func sortNames(items []Item) []Item {
+	names := make(map[int][]byte)
+	for i := range items {
+		strToByte := []byte(strings.ReplaceAll(strings.ToLower(items[i].Name), " ", ""))
+
+		if i == 0 {
+			names[i] = strToByte
+		} else {
+			for idxNames := range names {
+				for byteNames := range names[idxNames] {
+					for byteStrToByte := range strToByte {
+						if byteStrToByte > byteNames {
+							println("get next name")
+						} else if byteStrToByte == byteNames {
+							println("get next letter")
+						} else if byteStrToByte < byteNames {
+							println("insert name in array[idx]")
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return items
 }
 
 func loadEnv() {
