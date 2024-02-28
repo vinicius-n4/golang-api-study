@@ -9,6 +9,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/mvrilo/go-cpf"
 	"github.com/vinicius-n4/golang-api-study/database"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Item struct {
@@ -36,7 +38,7 @@ func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var data []Item
 
-	dbErr := database.DB.Order("name asc").Find(&data)
+	dbErr := database.DB.Find(&data)
 	if dbErr.Error != nil {
 		w.WriteHeader(http.StatusNoContent)
 		respMessage["message"] = http.StatusText(http.StatusNoContent) +
@@ -50,7 +52,9 @@ func listItemsHandler(w http.ResponseWriter, r *http.Request) {
 		data[i].Document = formatDocument(data[i].Document)
 	}
 
-	json.NewEncoder(w).Encode(data)
+	sortedList := sortNames(data)
+
+	json.NewEncoder(w).Encode(sortedList)
 }
 
 func createItemHandler(w http.ResponseWriter, r *http.Request) {
@@ -75,8 +79,9 @@ func createItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	titleCaser := cases.Title(language.English)
 	var data = Item{
-		Name:     r.FormValue("name"),
+		Name:     titleCaser.String(r.FormValue("name")),
 		Document: r.FormValue("document"),
 	}
 
@@ -121,7 +126,8 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.FormValue("name") != "" {
-		data.Name = r.FormValue("name")
+		titleCaser := cases.Title(language.English)
+		data.Name = titleCaser.String(r.FormValue("name"))
 	}
 
 	if r.FormValue("document") != "" {
@@ -185,6 +191,18 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
 
 func formatDocument(document string) string {
 	return document[:3] + "." + document[3:6] + "." + document[6:9] + "-" + document[9:]
+}
+
+func sortNames(items []Item) []Item {
+	n := len(items)
+	for i := 0; i < n; i++ {
+		for j := 0; j < n-i-1; j++ {
+			if items[j].Name > items[j+1].Name {
+				items[j], items[j+1] = items[j+1], items[j]
+			}
+		}
+	}
+	return items
 }
 
 func loadEnv() {
