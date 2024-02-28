@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/mvrilo/go-cpf"
 	"github.com/vinicius-n4/golang-api-study/database"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Item struct {
@@ -78,8 +79,9 @@ func createItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	titleCaser := cases.Title(language.English)
 	var data = Item{
-		Name:     r.FormValue("name"),
+		Name:     titleCaser.String(r.FormValue("name")),
 		Document: r.FormValue("document"),
 	}
 
@@ -124,7 +126,8 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.FormValue("name") != "" {
-		data.Name = r.FormValue("name")
+		titleCaser := cases.Title(language.English)
+		data.Name = titleCaser.String(r.FormValue("name"))
 	}
 
 	if r.FormValue("document") != "" {
@@ -191,29 +194,14 @@ func formatDocument(document string) string {
 }
 
 func sortNames(items []Item) []Item {
-	names := make(map[int][]byte)
-	for i := range items {
-		strToByte := []byte(strings.ReplaceAll(strings.ToLower(items[i].Name), " ", ""))
-
-		if i == 0 {
-			names[i] = strToByte
-		} else {
-			for idxNames := range names {
-				for byteNames := range names[idxNames] {
-					for byteStrToByte := range strToByte {
-						if byteStrToByte > byteNames {
-							println("get next name")
-						} else if byteStrToByte == byteNames {
-							println("get next letter")
-						} else if byteStrToByte < byteNames {
-							println("insert name in array[idx]")
-						}
-					}
-				}
+	n := len(items)
+	for i := 0; i < n; i++ {
+		for j := 0; j < n-i-1; j++ {
+			if items[j].Name > items[j+1].Name {
+				items[j], items[j+1] = items[j+1], items[j]
 			}
 		}
 	}
-
 	return items
 }
 
